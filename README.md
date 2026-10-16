@@ -82,3 +82,4 @@ For a project presentation or submission, capture screenshots of:
 Suggested demonstration: introduce the target users and catalog, show search and category
 filtering, open a product detail, add it to the cart, change its quantity, and explain how the
 shared service updates the item count and subtotal.
+"# BeatZone" 

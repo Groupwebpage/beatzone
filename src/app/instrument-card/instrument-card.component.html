@@ -1,0 +1,13 @@
+<article class="product-card">
+  <a class="product-image-link" [routerLink]="['/details', product().id]" [attr.aria-label]="'View details for ' + product().name">
+    <img [src]="product().photo" [alt]="product().name" />
+  </a>
+  <div class="product-copy">
+    <p class="category">{{ product().category }}</p>
+    <h2><a class="product-title-link" [routerLink]="['/details', product().id]">{{ product().name }}</a></h2>
+    <p class="description">{{ product().description }}</p>
+    <div class="product-footer">
+      <p class="price">{{ product().price | currency:'PHP':'symbol-narrow':'1.0-0' }}</p>
+    </div>
+  </div>
+</article>

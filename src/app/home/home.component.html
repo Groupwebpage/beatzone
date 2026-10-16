@@ -1,0 +1,74 @@
+<main class="store-page">
+  <header class="store-header">
+    <a class="brand" routerLink="/" aria-label="BeatZone home">
+      <span class="brand-mark" aria-hidden="true">&#9835;</span>
+      <span>BeatZone</span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a routerLink="/" fragment="catalog">Shop instruments</a>
+      <a routerLink="/" fragment="about">Our story</a>
+    </nav>
+    <app-instrument-cart />
+  </header>
+
+  <section class="store-intro" aria-labelledby="store-title">
+    <p class="eyebrow">Find your sound</p>
+    <h1 id="store-title">Instruments for every kind of musician.</h1>
+  </section>
+
+  <form class="search-bar" (submit)="applySearch($event)" role="search">
+    <label for="product-search">Search instruments</label>
+    <input
+      id="product-search"
+      name="search"
+      type="search"
+      placeholder="Search instruments or categories"
+      [value]="searchText()"
+      (input)="updateSearch($event)"
+    />
+    <button type="submit">Search</button>
+    @if (searchText() || query()) {
+      <button class="clear-search" type="button" (click)="clearSearch()">Clear</button>
+    }
+  </form>
+
+  <section id="catalog" class="catalog" aria-label="Instrument catalog">
+    <div class="catalog-heading">
+      <h2>Explore instruments</h2>
+      <p aria-live="polite">
+        {{ filteredProducts().length }} {{ filteredProducts().length === 1 ? 'instrument' : 'instruments' }}
+      </p>
+    </div>
+    <div class="category-filters" aria-label="Filter by instrument category">
+      @for (category of categories; track category) {
+        <button
+          type="button"
+          class="category-filter"
+          [class.active]="selectedCategory() === category"
+          [attr.aria-pressed]="selectedCategory() === category"
+          (click)="selectCategory(category)"
+        >
+          {{ category }}
+        </button>
+      }
+    </div>
+    <div class="product-grid">
+      @for (product of filteredProducts(); track product.id) {
+        <app-instrument-card [product]="product" />
+      } @empty {
+        <p class="empty-state">No instruments match your search. Try another name or category.</p>
+      }
+    </div>
+  </section>
+
+  <section id="about" class="about-section" aria-labelledby="about-title">
+    <p class="eyebrow">Made for the music</p>
+    <h2 id="about-title">A good instrument makes room for your next idea.</h2>
+    <a routerLink="/" fragment="catalog">Browse the collection <span aria-hidden="true">&#8593;</span></a>
+  </section>
+
+  <footer class="store-footer">
+    <span>BeatZone</span>
+    <span>Find your sound. Make it yours.</span>
+  </footer>
+</main>

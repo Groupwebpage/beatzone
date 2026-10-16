@@ -1,0 +1,16 @@
+{
+  "homes": [
+    {
+      "id": 1,
+      "name": "Acme Fresh Start Housing",
+      "city": "Chicago, IL",
+      "photo": "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=480&q=85"
+    },
+    {
+      "id": 2,
+      "name": "Homesteady Housing",
+      "city": "Chicago, IL",
+      "photo": "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=480&q=85"
+    }
+  ]
+}

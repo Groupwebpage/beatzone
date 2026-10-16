@@ -1,0 +1,54 @@
+<button class="cart-button" type="button" (click)="openCart()" aria-haspopup="dialog">
+  <span aria-hidden="true">&#128722;</span>
+  Cart
+  <span class="cart-count" aria-label="items in cart">{{ cart.count() }}</span>
+</button>
+
+<dialog #cartDialog class="cart-dialog" aria-labelledby="cart-title" (click)="closeOnBackdrop($event)">
+  <div class="cart-panel">
+    <header class="cart-heading">
+      <div>
+        <p class="eyebrow">Your selection</p>
+        <h2 id="cart-title">Shopping cart <span>({{ cart.count() }})</span></h2>
+      </div>
+      <button class="close-cart" type="button" aria-label="Close shopping cart" (click)="closeCart()">&times;</button>
+    </header>
+
+    @if (cart.items().length) {
+      <ul class="cart-list">
+        @for (item of cart.items(); track item.product.id) {
+          <li class="cart-item">
+            <img [src]="item.product.photo" [alt]="item.product.name" />
+            <div class="cart-item-info">
+              <h3>{{ item.product.name }}</h3>
+              <p>{{ item.product.price | currency:'PHP':'symbol-narrow':'1.0-0' }}</p>
+              <div class="quantity-controls" [attr.aria-label]="'Quantity for ' + item.product.name">
+                <button type="button" (click)="cart.changeQuantity(item.product.id, -1)" [attr.aria-label]="'Remove one ' + item.product.name">−</button>
+                <span>{{ item.quantity }}</span>
+                <button type="button" (click)="cart.changeQuantity(item.product.id, 1)" [attr.aria-label]="'Add one ' + item.product.name">+</button>
+              </div>
+            </div>
+            <button
+              class="remove-item"
+              type="button"
+              (click)="removeItem(item.product.id, item.quantity)"
+              [attr.aria-label]="'Remove ' + item.product.name + ' from cart'"
+            >
+              Remove
+            </button>
+          </li>
+        }
+      </ul>
+      <footer class="cart-footer">
+        <p><span>Subtotal</span><strong>{{ cart.total() | currency:'PHP':'symbol-narrow':'1.0-0' }}</strong></p>
+        <p class="shipping-note">Shipping and taxes calculated at checkout.</p>
+      </footer>
+    } @else {
+      <div class="empty-cart">
+        <p class="empty-cart-icon" aria-hidden="true">&#9835;</p>
+        <h3>Your cart is waiting for a new sound.</h3>
+        <p>Add an instrument to get started.</p>
+      </div>
+    }
+  </div>
+</dialog>

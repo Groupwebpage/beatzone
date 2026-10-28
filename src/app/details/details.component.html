@@ -1,85 +1,80 @@
-<main class="details-page">
-  <header class="store-header">
-    <a class="brand" routerLink="/" aria-label="BeatZone home">
-      <span class="brand-mark" aria-hidden="true">&#9835;</span>
-      <span>BeatZone</span>
-    </a>
-    <app-instrument-cart />
-  </header>
+import { CurrencyPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { InstrumentCartComponent } from '../instrument-cart/instrument-cart.component';
+import { InstrumentCartService } from '../instrument-cart.service';
+import { INSTRUMENTS } from '../instrument-data';
 
-  @if (product(); as instrument) {
-    <article class="product-details">
-      <a class="back-link" routerLink="/">&#8592; Back to instruments</a>
-      <div class="details-layout">
-        <img class="details-image" [src]="instrument.photo" [alt]="instrument.name" />
-        <section class="details-copy" aria-labelledby="product-title">
-          <p class="category">{{ instrument.category }}</p>
-          <h1 id="product-title">{{ instrument.name }}</h1>
-          <p class="details-description">{{ instrument.description }}</p>
-          <p class="details-price">{{ instrument.price | currency:'PHP':'symbol-narrow':'1.0-0' }}</p>
-          <button class="add-to-cart" type="button" (click)="openDetailsForm()">Add to cart</button>
-          <p class="cart-message" aria-live="polite">{{ cartMessage() }}</p>
-        </section>
-      </div>
+@Component({
+  selector: 'app-details',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CurrencyPipe, InstrumentCartComponent, ReactiveFormsModule, RouterLink],
+  templateUrl: './details.component.html',
+  styleUrl: './details.component.css'
+})
+export class DetailsComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly cart = inject(InstrumentCartService);
+  private readonly routeParams = toSignal(this.route.paramMap, {
+    initialValue: this.route.snapshot.paramMap
+  });
 
-      <dialog #detailsDialog class="details-dialog" aria-labelledby="details-dialog-title" (click)="closeOnBackdrop($event)">
-        <section class="details-modal">
-          <header class="modal-heading">
-            <div>
-              <p class="category">Almost there</p>
-              <h2 id="details-dialog-title">Your delivery details</h2>
-            </div>
-            <button class="close-modal" type="button" aria-label="Close details form" (click)="closeDetailsForm()">&times;</button>
-          </header>
-          <p class="modal-product">{{ instrument.name }} · {{ instrument.price | currency:'PHP':'symbol-narrow':'1.0-0' }}</p>
+  protected readonly product = computed(() => {
+    const id = Number(this.routeParams().get('id'));
+    return INSTRUMENTS.find((instrument) => instrument.id === id);
+  });
 
-          <form class="details-form" [formGroup]="detailsForm" (ngSubmit)="addToCart()">
-            <div class="field-group">
-              <label class="field" for="full-name">
-                <span>Full name</span>
-                <input id="full-name" type="text" formControlName="fullName" placeholder="Your name" autofocus />
-                @if (detailsForm.controls.fullName.invalid && detailsForm.controls.fullName.touched) {
-                  <small>Please enter your full name.</small>
-                }
-              </label>
+  protected readonly cartMessage = signal('');
+  private readonly detailsDialog = viewChild.required<ElementRef<HTMLDialogElement>>('detailsDialog');
 
-              <label class="field" for="email">
-                <span>Email</span>
-                <input id="email" type="email" formControlName="email" placeholder="you@example.com" />
-                @if (detailsForm.controls.email.invalid && detailsForm.controls.email.touched) {
-                  <small>Please enter a valid email.</small>
-                }
-              </label>
+  protected readonly detailsForm = new FormGroup({
+    fullName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2)] }),
+    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    phone: new FormControl('', { nonNullable: true }),
+    address: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(8)] }),
+    notes: new FormControl('', { nonNullable: true })
+  });
 
-              <label class="field" for="phone">
-                <span>Phone</span>
-                <input id="phone" type="tel" formControlName="phone" placeholder="Optional" />
-              </label>
-
-              <label class="field" for="address">
-                <span>Shipping address</span>
-                <textarea id="address" formControlName="address" rows="3" placeholder="Street, city, and ZIP code"></textarea>
-                @if (detailsForm.controls.address.invalid && detailsForm.controls.address.touched) {
-                  <small>Please add a delivery address.</small>
-                }
-              </label>
-
-              <label class="field" for="notes">
-                <span>Delivery notes</span>
-                <textarea id="notes" formControlName="notes" rows="2" placeholder="Optional notes for the courier"></textarea>
-              </label>
-            </div>
-
-            <button class="add-to-cart" type="submit" [disabled]="detailsForm.invalid">Continue to cart</button>
-          </form>
-        </section>
-      </dialog>
-    </article>
-  } @else {
-    <section class="not-found" aria-labelledby="not-found-title">
-      <h1 id="not-found-title">Instrument not found</h1>
-      <p>That instrument may no longer be available.</p>
-      <a class="back-link" routerLink="/">Back to instruments</a>
-    </section>
+  protected openDetailsForm(): void {
+    this.detailsDialog().nativeElement.showModal();
   }
-</main>
+
+  protected closeDetailsForm(): void {
+    this.detailsDialog().nativeElement.close();
+  }
+
+  protected closeOnBackdrop(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.closeDetailsForm();
+    }
+  }
+
+  protected addToCart(): void {
+    if (this.detailsForm.invalid) {
+      this.detailsForm.markAllAsTouched();
+      return;
+    }
+
+    const product = this.product();
+    if (!product) {
+      return;
+    }
+
+    const details = this.detailsForm.getRawValue();
+    this.cart.saveCustomerDetails({
+      fullName: details.fullName.trim(),
+      email: details.email.trim(),
+      phone: details.phone.trim() || 'Not provided',
+      address: details.address.trim(),
+      notes: details.notes.trim() || 'No special requests'
+    });
+
+    this.cart.add(product);
+    this.closeDetailsForm();
+    this.cart.openCart();
+    this.cartMessage.set(`${product.name} added to your cart.`);
+    this.detailsForm.reset();
+  }
+}

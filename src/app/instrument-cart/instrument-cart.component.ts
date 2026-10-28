@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, viewChild } from '@angular/core';
 import { InstrumentCartService } from '../instrument-cart.service';
 
 @Component({
@@ -13,12 +13,29 @@ export class InstrumentCartComponent {
   protected readonly cart = inject(InstrumentCartService);
   protected readonly cartDialog = viewChild.required<ElementRef<HTMLDialogElement>>('cartDialog');
 
+  private readonly dialogState = effect(() => {
+    const dialog = this.cartDialog();
+    const isOpen = this.cart.isCartOpen();
+
+    if (!dialog) {
+      return;
+    }
+
+    if (isOpen && !dialog.nativeElement.open) {
+      dialog.nativeElement.showModal();
+    }
+
+    if (!isOpen && dialog.nativeElement.open) {
+      dialog.nativeElement.close();
+    }
+  });
+
   protected openCart(): void {
-    this.cartDialog().nativeElement.showModal();
+    this.cart.openCart();
   }
 
   protected closeCart(): void {
-    this.cartDialog().nativeElement.close();
+    this.cart.closeCart();
   }
 
   protected closeOnBackdrop(event: MouseEvent): void {

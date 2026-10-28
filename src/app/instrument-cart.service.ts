@@ -2,9 +2,21 @@ import { computed, Injectable, signal } from '@angular/core';
 import { INSTRUMENTS } from './instrument-data';
 import { InstrumentProduct } from './instrument';
 
+export interface CustomerDetails {
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  notes: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class InstrumentCartService {
   private readonly quantities = signal<Record<number, number>>({});
+  private readonly cartOpen = signal(false);
+  readonly customerDetails = signal<CustomerDetails | null>(null);
+
+  readonly isCartOpen = this.cartOpen.asReadonly();
 
   readonly items = computed(() =>
     INSTRUMENTS
@@ -25,6 +37,18 @@ export class InstrumentCartService {
       ...items,
       [product.id]: (items[product.id] ?? 0) + 1
     }));
+  }
+
+  saveCustomerDetails(details: CustomerDetails): void {
+    this.customerDetails.set(details);
+  }
+
+  openCart(): void {
+    this.cartOpen.set(true);
+  }
+
+  closeCart(): void {
+    this.cartOpen.set(false);
   }
 
   changeQuantity(productId: number, change: number): void {

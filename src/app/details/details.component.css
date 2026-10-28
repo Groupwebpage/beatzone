@@ -59,7 +59,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
   gap: clamp(32px, 6vw, 76px);
-  align-items: center;
+  align-items: start;
 }
 
 .details-image {
@@ -104,6 +104,107 @@
   font-weight: 700;
 }
 
+.details-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  padding: 0;
+  overflow: auto;
+  border: 0;
+  border-radius: 14px;
+  background: #fffefa;
+  color: #262720;
+  box-shadow: 0 24px 80px rgb(23 32 27 / 28%);
+}
+
+.details-dialog::backdrop {
+  background: rgb(24 31 27 / 58%);
+  backdrop-filter: blur(3px);
+}
+
+.details-modal {
+  padding: clamp(22px, 5vw, 36px);
+}
+
+.modal-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.modal-heading .category {
+  margin-bottom: 8px;
+}
+
+.modal-heading h2 {
+  margin: 0;
+  color: #283b32;
+  font-family: Georgia, serif;
+  font-size: clamp(25px, 5vw, 32px);
+  font-weight: 500;
+}
+
+.close-modal {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 50%;
+  background: #f0eee8;
+  color: #283b32;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal-product {
+  margin: 14px 0 22px;
+  color: #68675f;
+  font-size: 14px;
+}
+
+.details-form {
+  display: grid;
+  gap: 18px;
+}
+
+.field-group {
+  display: grid;
+  gap: 14px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  color: #283b32;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #d9d3c7;
+  border-radius: 8px;
+  background: #fffdfb;
+  color: #283b32;
+  font: inherit;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: 2px solid #b38f5a;
+  outline-offset: 2px;
+}
+
+.field small {
+  color: #a04d45;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .add-to-cart {
   min-height: 48px;
   padding: 0 24px;
@@ -116,7 +217,12 @@
   cursor: pointer;
 }
 
-.add-to-cart:hover {
+.add-to-cart:disabled {
+  background: #7f8b84;
+  cursor: not-allowed;
+}
+
+.add-to-cart:hover:not(:disabled) {
   background: #385343;
 }
 
@@ -142,7 +248,8 @@
 
 .brand:focus-visible,
 .back-link:focus-visible,
-.add-to-cart:focus-visible {
+.add-to-cart:focus-visible,
+.close-modal:focus-visible {
   outline: 3px solid #9a7443;
   outline-offset: 3px;
 }
